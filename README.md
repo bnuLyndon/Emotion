@@ -9,7 +9,7 @@ Requirment:
 5.Keras 1.2.0  
 
 Install:  
-1. Install OpenFace following https://github.com/TadasBaltrusaitis/OpenFace/wiki/Unix-Installation  
-2. Copy the CL_script to the main dir of OpenFace  
-3. Open the main.m, revise the data location  
-4. Open the main.py, revise the feature location, which should be in the CL_script dir
+1. Install the OpenFace following https://github.com/TadasBaltrusaitis/OpenFace/wiki/Unix-Installation  
+2. Copy the 'pre_processing' dir to the main dir of OpenFace  
+3. Open the pre_processing/main.m, revise the video data locations. Then run main.m in MATLAB  
+4. Open the emotion/main.py, revise the feature locations, which should be under the pre_processing dir. Then run main.py
