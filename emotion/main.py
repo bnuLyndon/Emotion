@@ -1,6 +1,6 @@
 #coding:utf-8
 """
-Author: Lyndon Lee
+Author: Liandong Li
 """
 
 from keras.layers import Input, LSTM, RepeatVector, merge
@@ -25,17 +25,18 @@ import pickle
 
 from my_recurrent import TAGM
 
-os.environ['CUDA_VISIBLE_DEVICES']="2"
+os.environ['CUDA_VISIBLE_DEVICES']="0"
 
 #%%
 print('Loading data...')
-train_dir='/usr0/home/liandonl/Datasets/CL_train/'
-val_dir='/usr0/home/liandonl/Datasets/CL_val/'
-test_dir='/usr0/home/liandonl/Datasets/CL_test/'
+train_dir='/usr0/home/liandonl/Datasets/CL_train/'  # Training dir of HOG feature, please revised
+val_dir='/usr0/home/liandonl/Datasets/CL_val/'      # Validation dir of HOG feature, please revised
+test_dir='/usr0/home/liandonl/Datasets/CL_test/'    # Testing dir of HOG feature, please revised
 
-train_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_train/'
-val_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_val/'
-test_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_test/'
+train_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_train/' # Training dir of Faical LandMarks, please revised
+val_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_val/'     # Validation dir of Faical LandMarks, please revised
+test_dir_LM='/usr0/home/liandonl/Datasets/CL_LandMarks_test/'   # Testing dir of Faical LandMarks, please revised
+
 
 label_list=['N2H','N2S','N2D','N2A','N2C','N2Sur','S2N2H','H2N2S','H2N2D','H2N2A','H2N2C','D2N2Sur']
 #emo_list=['ANGER','CONTENTMENT','DISGUST','HAPPINESS','SADNESS','SURPRISE']
@@ -489,8 +490,8 @@ for i in xrange(6):
     rand_list=np.random.permutation(40)
     train_lists[i,:]=rand_list[0:NB_TRAIN]
     val_lists[i,:]=rand_list[NB_TRAIN:]
-print train_lists
-print val_lists
+#print train_lists
+#print val_lists
 ground_truth=np.array([1,1,1,1,1,0,0,0,0,0])
 final_acc=np.zeros([NB_ITER,6])
 pred_label_test=np.zeros([6,10])
@@ -680,7 +681,6 @@ print np.sum(test_acc)/6
 
 
 pkl_data={}
-test_dir='/usr0/home/liandonl/Datasets/CL_test/'
 mean_data_test=get_mean_test()
 pred_label_test=np.zeros([6,10])
 for j in range(6):
