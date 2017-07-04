@@ -513,7 +513,7 @@ mean_data_val=get_mean_val()
 #mean_data_val=np.load('/usr0/home/liandonl/Documents/python/ChaLearn/mean_val.npy')
 
 X_pre_train=np.zeros([40*12,TIME_STEP_LM,40])
-'''
+
 for j in range(6):
     
     x_train_pos=get_LM_train(j)
@@ -528,7 +528,7 @@ sequence_autoencoder.fit(X_pre_train, X_pre_train[:,::-1,:],
             batch_size=BATCH_SIZE)
 
 sequence_autoencoder.save_weights('CL_ae.hdf5')
-'''
+
 y_ground=np.load('val_ground.npy')
 
 for i in xrange(NB_ITER):
