@@ -122,6 +122,7 @@ def get_LM_val(idx):
     test_data=np.zeros([10,TIME_STEP_LM,40])
     mat_dir=val_dir_LM+emo_list[idx]+'/'
     mat_files=os.listdir(mat_dir)
+    mat_files.sort()
     for i in xrange(np.size(mat_files)):
         mat_name=mat_dir+mat_files[i]
         matfile=sio.loadmat(mat_name)
@@ -157,6 +158,7 @@ def get_LM_test(idx):
     test_data=np.zeros([10,TIME_STEP_LM,40])
     mat_dir=test_dir_LM+emo_list[idx]+'/'
     mat_files=os.listdir(mat_dir)
+    mat_files.sort()
     for i in xrange(np.size(mat_files)):
         mat_name=mat_dir+mat_files[i]
         matfile=sio.loadmat(mat_name)
@@ -175,7 +177,7 @@ def get_LM_test(idx):
         #print np.shape(mean)
         #print mean.dtype
         #print np.sum(mean)
-        #mean=mean_data_test[IDs_val[idx,i],:]
+        #mean=mean_data_test[IDs_test[idx,i],:]
         hog_data -= mean
 
         hog_data=hog_data[1::INT_LM,:]
@@ -217,6 +219,7 @@ def get_mean_val():
         for j in xrange(6):
             mat_dir=val_dir+emo_list[j]+'/'
             mat_files=os.listdir(mat_dir)
+            mat_files.sort()
             #print np.where(IDs_val[j,:]==i)
             idx=np.where(IDs_val[j,:]==i)
             for k in xrange(2):
@@ -245,7 +248,8 @@ def get_mean_test():
         for j in xrange(6):
             mat_dir=test_dir+emo_list[j]+'/'
             mat_files=os.listdir(mat_dir)
-            #print np.where(IDs_val[j,:]==i)
+            mat_files.sort()
+            #print np.where(IDs_test[j,:]==i)
             idx=np.where(IDs_test[j,:]==i)
             for k in xrange(2):
                 #print mat_files[0]
@@ -305,6 +309,7 @@ def get_data_val(idx):
     test_data=np.zeros([10,TIME_STEP,INPUT_DIM])
     mat_dir=val_dir+emo_list[idx]+'/'
     mat_files=os.listdir(mat_dir)
+    mat_files.sort()
     for i in xrange(np.size(mat_files)):
         mat_name=mat_dir+mat_files[i]
         matfile=sio.loadmat(mat_name)
@@ -340,6 +345,7 @@ def get_data_test(idx):
     test_data=np.zeros([10,TIME_STEP,INPUT_DIM])
     mat_dir=test_dir+emo_list[idx]+'/'
     mat_files=os.listdir(mat_dir)
+    mat_files.sort()
     for i in xrange(np.size(mat_files)):
         mat_name=mat_dir+mat_files[i]
         matfile=sio.loadmat(mat_name)
@@ -358,7 +364,7 @@ def get_data_test(idx):
         #print np.shape(mean)
         #print mean.dtype
         #print np.sum(mean)
-        mean=mean_data_test[IDs_val[idx,i],:]
+        mean=mean_data_test[IDs_test[idx,i],:]
         hog_data -= mean
 
         hog_data=hog_data[1::INT,:]
@@ -414,16 +420,16 @@ def get_data_train_aug(idx, data_list):
 #%%
 print('Setting params...')
 NB_CLASSES=2
-BATCH_SIZE=16
+BATCH_SIZE=64
 nb_epoch=150
 RES=48
 TIME_STEP=10
 TIME_STEP_LM=10
-NB_TRAIN=32
+NB_TRAIN=40
 NB_AUG=5
 INT=20
 INT_LM=20
-NB_ITER=1
+NB_ITER=3
 INPUT_DIM = 4464
 #mean:300, max:500
 
@@ -497,18 +503,17 @@ final_acc=np.zeros([NB_ITER,6])
 pred_label_test=np.zeros([6,10])
 pkl_data={}
 
-#mean_data_train=get_mean_train()
-#np.save('mean.npy',mean_data_train)
+mean_data_train=get_mean_train()
+#np.save('mean_train.npy',mean_data_train)
 
-#mean_data_test=get_mean_test()
-#np.save('mean_test.npy',mean_data_test)
+mean_data_val=get_mean_val()
+#np.save('mean_val.npy',mean_data_val)
 
-mean_data_train=np.load('/usr0/home/liandonl/Documents/python/ChaLearn_old/mean_train.npy')
-mean_data_val=np.load('/usr0/home/liandonl/Documents/python/ChaLearn_old/mean_test.npy')
-
+#mean_data_train=np.load('/usr0/home/liandonl/Documents/python/ChaLearn/mean_train.npy')
+#mean_data_val=np.load('/usr0/home/liandonl/Documents/python/ChaLearn/mean_val.npy')
 
 X_pre_train=np.zeros([40*12,TIME_STEP_LM,40])
-
+'''
 for j in range(6):
     
     x_train_pos=get_LM_train(j)
@@ -523,6 +528,7 @@ sequence_autoencoder.fit(X_pre_train, X_pre_train[:,::-1,:],
             batch_size=BATCH_SIZE)
 
 sequence_autoencoder.save_weights('CL_ae.hdf5')
+'''
 y_ground=np.load('val_ground.npy')
 
 for i in xrange(NB_ITER):
@@ -559,16 +565,11 @@ for i in xrange(NB_ITER):
         X_train=x_train
         Y_train=np_utils.to_categorical(y_train)
 
-        x_val_pos=get_data_train_aug(j,val_list)
-        y_val_pos=np.ones([(40-NB_TRAIN)*NB_AUG,1])
-        x_val_neg=get_data_train_aug(j+6,val_list)
-        y_val_neg=np.zeros([(40-NB_TRAIN)*NB_AUG,1])
-
-
-        x_val=np.concatenate((x_val_pos,x_val_neg),axis=0)
-        y_val=np.concatenate((y_val_pos,y_val_neg),axis=0)
-
-        X_val=x_val
+        [X_val, temp]=get_data_val(j)
+        y_val=np.ones([10*NB_AUG,1])
+        y_val=y_ground[j,:]
+        #for k in xrange(10):
+        #    y_val[NB_AUG*k:NB_AUG*(k+1),:]=y_ground[j,k]
         Y_val=np_utils.to_categorical(y_val)
 
         #LandMarks
@@ -580,12 +581,11 @@ for i in xrange(NB_ITER):
         x_train=np.concatenate((x_train_pos,x_train_neg),axis=0)
         X_train_LM=x_train
 
-        x_val_pos=get_LM_train_aug(j,val_list)
-        x_val_neg=get_LM_train_aug(j+6,val_list)
-
-        x_val=np.concatenate((x_val_pos,x_val_neg),axis=0)
+        [x_val,temp]=get_LM_val(j)
         X_val_LM=x_val
 
+        print np.shape(X_val_LM)
+        print np.shape(X_val)
 
         model.load_weights('CL.hdf5')
         #ccc_point=CCC_callback_ccc_reg(model, X_val, BATCH_SIZE, y_val, j+20)
@@ -609,6 +609,7 @@ for i in xrange(NB_ITER):
         final_acc[i,j]=val_acc
 
 eval_val=np.zeros(6)
+y_ground=np.load('val_ground.npy')
 
 for j in range(6):
     
@@ -622,38 +623,19 @@ for j in range(6):
     model.save_weights(new_file_path)
 
     #HOG
-    x_val_pos=get_data_train_aug(j,val_list)
-    y_val_pos=np.ones([(40-NB_TRAIN)*NB_AUG,1])
-    x_val_neg=get_data_train_aug(j+6,val_list)
-    y_val_neg=np.zeros([(40-NB_TRAIN)*NB_AUG,1])
-
-    x_val=np.concatenate((x_val_pos,x_val_neg),axis=0)
-    y_val=np.concatenate((y_val_pos,y_val_neg),axis=0)
-
-    X_val=x_val
+    [X_val,temp]=get_data_val(j)
+    y_val=y_ground[j,:]
     Y_val=np_utils.to_categorical(y_val)
 
     #LandMarks
-    x_val_pos=get_LM_train_aug(j,val_list)
-    x_val_neg=get_LM_train_aug(j+6,val_list)
-
-    x_val=np.concatenate((x_val_pos,x_val_neg),axis=0)
+    [x_val,temp]=get_LM_val(j)
     X_val_LM=x_val
 
     [val_loss,val_acc]=model.evaluate([X_val,X_val_LM],Y_val,batch_size=BATCH_SIZE,verbose=1)
     eval_val[j]=val_acc
-    
-    [X_test, video_names]=get_data_val(j)
-    [X_test_LM, temp]=get_LM_val(j)
-    #pred_label=model.predict_classes(X_test,batch_size=BATCH_SIZE,verbose=1) 
-    pred_label=model.predict([X_test,X_test_LM],batch_size=BATCH_SIZE,verbose=1)
-    pred_label=np.argmax(pred_label,axis=1)
 
-    print pred_label    
-    for k in xrange(np.size(video_names)):
-        file_name=video_names[k][:-4]+'.mp4'
-        print file_name
-        pkl_data[file_name]=PREDICTED_LABEL[pred_label[k]]
+    pred_label=model.predict([X_val,X_val_LM],batch_size=BATCH_SIZE,verbose=1)
+    pred_label=np.argmax(pred_label,axis=1)
     pred_label_test[j,:]=pred_label
 
 print eval_val
@@ -662,15 +644,8 @@ print final_acc
 print np.mean(final_acc)
 print pred_label_test
 
-output = open('valid_prediction.pkl', 'wb')
-
-# Pickle dictionary using protocol 0.
-pickle.dump(pkl_data, output)
-
-output.close()
-
 test_acc=np.zeros(6)
-y_ground=np.load('val_ground.npy')
+
 print y_ground
 for i in xrange(6):
     temp=y_ground[i,:]-pred_label_test[i,:]
